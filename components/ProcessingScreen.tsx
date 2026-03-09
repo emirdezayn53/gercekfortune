@@ -12,7 +12,7 @@ const MESSAGES = [
   "Son dokunuşlar yapılıyor...",
 ];
 
-export default function ProcessingScreen({ previewUrl }: { previewUrl: string }) {
+export default function ProcessingScreen({ previewUrl, userName }: { previewUrl: string; userName?: string }) {
   const [msgIdx, setMsgIdx] = useState(0);
   const [dots, setDots] = useState(".");
 
@@ -28,7 +28,6 @@ export default function ProcessingScreen({ previewUrl }: { previewUrl: string })
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
-      {/* Image with scan effect */}
       {previewUrl && (
         <div className="relative w-36 h-36 rounded-2xl overflow-hidden mb-10 gradient-border">
           <Image src={previewUrl} alt="Yüklenen fotoğraf" fill className="object-cover" />
@@ -40,7 +39,6 @@ export default function ProcessingScreen({ previewUrl }: { previewUrl: string })
         </div>
       )}
 
-      {/* Orbital spinner */}
       <div className="relative w-28 h-28 flex items-center justify-center mb-8">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 shadow-[0_0_30px_rgba(139,92,246,0.6)] animate-pulse-slow" />
         <div className="absolute w-full h-full rounded-full border border-purple-700/30 animate-spin-slow" />
@@ -49,8 +47,10 @@ export default function ProcessingScreen({ previewUrl }: { previewUrl: string })
         <div className="absolute orbit-3 w-1.5 h-1.5 rounded-full bg-white/40" />
       </div>
 
-      <h2 className="font-display text-3xl font-bold text-white mb-3">Falına Bakılıyor</h2>
-      <div className="w-16 h-px bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-5" />
+      <h2 className="font-display text-3xl font-bold text-white mb-1">
+        {userName ? `${userName}, falına bakılıyor` : "Falına Bakılıyor"}
+      </h2>
+      <div className="w-16 h-px bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-5 mt-3" />
       <p className="text-white/50 text-lg min-h-7 transition-all duration-500">
         {MESSAGES[msgIdx]}{dots}
       </p>
