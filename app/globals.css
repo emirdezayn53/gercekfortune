@@ -1,131 +1,134 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --gold: #d4af37;
-  --gold-light: #f0d060;
-  --purple-deep: #3b0764;
-  --purple: #6b21a8;
-  --purple-glow: #a855f7;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: #0a0a0f;
-  color: #f3e8ff;
-  font-family: 'Crimson Text', Georgia, serif;
+  background: #080810;
+  color: #f0eeff;
+  font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
 
-/* Stars background */
-.stars-bg {
+body::before {
+  content: '';
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
-  overflow: hidden;
 }
 
-.star {
-  position: absolute;
+.orb {
+  position: fixed;
   border-radius: 50%;
-  background: white;
-  animation: twinkle var(--duration, 3s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Gold shimmer text */
-.gold-shimmer {
-  background: linear-gradient(
-    90deg,
-    #a07820 0%,
-    #d4af37 25%,
-    #f0d060 50%,
-    #d4af37 75%,
-    #a07820 100%
-  );
+.gold-text {
+  background: linear-gradient(135deg, #c8a84b 0%, #f5d680 40%, #c8a84b 60%, #f5d680 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
+  animation: goldShimmer 4s linear infinite;
 }
 
-/* Glowing border */
-.glow-border {
-  box-shadow:
-    0 0 10px rgba(168, 85, 247, 0.3),
-    0 0 30px rgba(168, 85, 247, 0.1),
-    inset 0 0 10px rgba(168, 85, 247, 0.05);
+@keyframes goldShimmer {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
 }
 
-.glow-border:hover {
-  box-shadow:
-    0 0 20px rgba(168, 85, 247, 0.5),
-    0 0 60px rgba(168, 85, 247, 0.2),
-    inset 0 0 20px rgba(168, 85, 247, 0.1);
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.glow-gold {
-  box-shadow:
-    0 0 10px rgba(212, 175, 55, 0.4),
-    0 0 30px rgba(212, 175, 55, 0.2),
-    0 0 60px rgba(212, 175, 55, 0.1);
+.upload-zone {
+  border: 2px dashed rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
 }
 
-/* Fortune text typing effect */
-.fortune-char {
-  opacity: 0;
-  animation: fadeInChar 0.03s ease forwards;
+.upload-zone:hover, .upload-zone-active {
+  border-color: rgba(200, 168, 75, 0.6) !important;
+  background: rgba(200, 168, 75, 0.03) !important;
+  box-shadow: 0 0 40px rgba(200, 168, 75, 0.1) !important;
 }
 
-@keyframes fadeInChar {
-  to { opacity: 1; }
+.btn-glow { transition: all 0.3s ease; }
+.btn-glow:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 8px 30px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+.gradient-border {
+  position: relative;
 }
-
-::-webkit-scrollbar-track {
-  background: #0a0a0f;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #6b21a8;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #9333ea;
-}
-
-/* Orb animations */
-.orb {
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.15;
+.gradient-border::before {
+  content: '';
   position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(139,92,246,0.5), rgba(200,168,75,0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   pointer-events: none;
 }
 
-/* Upload zone hover */
-.upload-zone-active {
-  border-color: #d4af37 !important;
-  background: rgba(212, 175, 55, 0.05) !important;
-  box-shadow:
-    0 0 20px rgba(212, 175, 55, 0.3),
-    inset 0 0 20px rgba(212, 175, 55, 0.05) !important;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-float-slow { animation: float 5s ease-in-out infinite; }
+
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes scanline {
+  0%, 100% { top: -4px; }
+  50% { top: calc(100% + 4px); }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
+}
+@keyframes orbit2 {
+  from { transform: rotate(120deg) translateX(70px) rotate(-120deg); }
+  to { transform: rotate(480deg) translateX(70px) rotate(-480deg); }
+}
+@keyframes orbit3 {
+  from { transform: rotate(240deg) translateX(90px) rotate(-240deg); }
+  to { transform: rotate(600deg) translateX(90px) rotate(-600deg); }
+}
+.orbit-1 { animation: orbit 4s linear infinite; }
+.orbit-2 { animation: orbit2 7s linear infinite; }
+.orbit-3 { animation: orbit3 10s linear infinite; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.6s ease forwards; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #080810; }
+::-webkit-scrollbar-thumb { background: #3d2a6e; border-radius: 2px; }

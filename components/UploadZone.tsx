@@ -4,103 +4,47 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
 
-interface UploadZoneProps {
-  onUpload: (file: File) => void;
-}
+export default function UploadZone({ onUpload }: { onUpload: (file: File) => void }) {
+  const [dragging, setDragging] = useState(false);
 
-export default function UploadZone({ onUpload }: UploadZoneProps) {
-  const [isDragging, setIsDragging] = useState(false);
-
-  const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: unknown[]) => {
-      if (rejectedFiles && (rejectedFiles as File[]).length > 0) {
-        toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
-        return;
-      }
-      if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0];
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error("Image is too large. Maximum size is 10MB.");
-          return;
-        }
-        onUpload(file);
-      }
-    },
-    [onUpload]
-  );
+  const onDrop = useCallback((accepted: File[], rejected: unknown[]) => {
+    setDragging(false);
+    if ((rejected as File[]).length > 0) { toast.error("Geçersiz dosya. JPG veya PNG yükle."); return; }
+    if (accepted[0]?.size > 10 * 1024 * 1024) { toast.error("Dosya çok büyük. Maks 10MB."); return; }
+    if (accepted[0]) onUpload(accepted[0]);
+  }, [onUpload]);
 
   const { getRootProps, getInputProps, open } = useDropzone({
     onDrop,
-    accept: {
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/webp": [".webp"],
-    },
+    accept: { "image/jpeg": [".jpg", ".jpeg"], "image/png": [".png"], "image/webp": [".webp"] },
     maxFiles: 1,
-    noClick: false,
-    onDragEnter: () => setIsDragging(true),
-    onDragLeave: () => setIsDragging(false),
-    onDropAccepted: () => setIsDragging(false),
-    onDropRejected: () => setIsDragging(false),
+    onDragEnter: () => setDragging(true),
+    onDragLeave: () => setDragging(false),
   });
 
   return (
-    <div className="w-full">
-      <div
-        {...getRootProps()}
-        className={`
-          relative w-full rounded-2xl border-2 border-dashed cursor-pointer
-          transition-all duration-300 p-8 sm:p-12 text-center
-          ${isDragging
-            ? "upload-zone-active border-mystic-gold"
-            : "border-purple-700 hover:border-purple-500 glow-border"
-          }
-          bg-gradient-to-b from-purple-950/30 to-mystic-black/50
-        `}
-      >
-        <input {...getInputProps()} />
-
-        {/* Crystal ball icon */}
-        <div className="flex justify-center mb-5">
-          <div className={`text-6xl transition-transform duration-300 ${isDragging ? "scale-110" : "animate-float"}`}>
-            🔮
-          </div>
-        </div>
-
-        <p className="font-mystic text-lg text-purple-200 mb-2">
-          {isDragging ? "Release to reveal your fortune..." : "Drop your image here"}
-        </p>
-        <p className="text-purple-400 font-body text-sm mb-6">
-          or click to choose a photo
-        </p>
-
-        {/* Upload button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            open();
-          }}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl
-            bg-gradient-to-r from-purple-900 to-purple-700
-            border border-purple-500 hover:border-mystic-gold
-            text-purple-100 hover:text-mystic-gold
-            font-body text-base transition-all duration-300
-            hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-        >
-          <span>📸</span>
-          <span>Choose Photo</span>
-        </button>
-
-        <p className="text-purple-600 text-xs font-body mt-4">
-          Supports JPEG, PNG, WebP · Max 10MB
-        </p>
-
-        {/* Mobile camera hint */}
-        <p className="text-purple-600 text-xs font-body mt-1">
-          📱 On mobile, you can take a photo directly
-        </p>
+    <div
+      {...getRootProps()}
+      className={`upload-zone rounded-3xl p-10 text-center cursor-pointer glass ${dragging ? "upload-zone-active" : ""}`}
+    >
+      <input {...getInputProps()} />
+      <div className={`text-5xl mb-4 transition-transform duration-300 ${dragging ? "scale-125" : "animate-float"}`}>
+        {dragging ? "✨" : "📸"}
       </div>
+      <p className="text-white/70 font-medium mb-1 text-lg">
+        {dragging ? "Bırak, fala başlayalım!" : "Fotoğrafını buraya sürükle"}
+      </p>
+      <p className="text-white/30 text-sm mb-6">veya tıkla ve seç</p>
+      <button
+        type="button"
+        onClick={e => { e.stopPropagation(); open(); }}
+        className="btn-glow inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl
+          bg-violet-600 hover:bg-violet-500 text-white font-semibold text-base
+          transition-all duration-300"
+      >
+        Fotoğraf Yükle
+      </button>
+      <p className="text-white/20 text-xs mt-5">JPG, PNG, WebP · Maks 10MB · 📱 Mobilde kamera ile çekebilirsin</p>
     </div>
   );
 }

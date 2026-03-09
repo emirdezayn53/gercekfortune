@@ -5,41 +5,38 @@ function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-const FORTUNE_PROMPT = `You are a mystical fortune teller with ancient wisdom.
-Analyze the uploaded image carefully.
+const FORTUNE_PROMPT = `Sen deneyimli bir Türk falcısısın. Sana yüklenen fotoğrafı dikkatlice incele.
 
-If it is a coffee cup reading (Turkish coffee):
-- Interpret the shapes, symbols, animals, and patterns you see in the coffee grounds
-- Describe what each symbol means for the person's future
-- Mention love, career, travel, and spiritual insights
+Eğer fotoğraf bir kahve fincanıysa:
+- Fincan dibindeki ve kenarlarındaki şekilleri, sembolleri ve figürleri yorumla.
+- Her sembolün o kişinin hayatındaki karşılığını anlat.
+- Aşk, iş, seyahat ve sağlık konularına değin.
 
-If it is a palm reading:
-- Interpret the major palm lines (life line, heart line, head line, fate/destiny line)
-- Describe the person's character traits and future path
-- Include insights about relationships, career, and longevity
+Eğer el falıysa:
+- Kader çizgisi, kalp çizgisi, akıl çizgisi ve yaşam çizgisini yorumla.
+- Kişinin karakteri ve geleceği hakkında özgün şeyler söyle.
 
-If it is a tarot card:
-- Identify the card and its imagery
-- Interpret the card's upright or reversed meaning
-- Connect the symbolism to the querent's life journey
+Eğer tarot kartıysa:
+- Kartı tanımla ve sembolizmini yorumla.
+- Kişinin şu anki durumuna ve yakın geleceğine bağla.
 
-If it is something else entirely:
-- Interpret the image with mystical symbolism
-- Find patterns, shapes, and meanings within it
+Türkçe yaz. Samimi, günlük konuşma diliyle yaz. Çok resmi veya robotik olma.
 
-Write a mystical and intriguing fortune reading that feels personal and profound.
+Kurallar:
+- Doğal Türkçe kullan, "sana şunu söyleyeyim..." gibi ifadeler kullan
+- Hafif nükteli ol ama abarma
+- Özgün ve kişisel hissettir, genel klişelerden kaçın
+- Somut olaylar ve olasılıklardan bahset
+- Kişiyi "sen" diye hitap et
 
-Tone: mystical, mysterious, warm, and positive
-Length: 200–300 words
-Style: Speak directly to the person ("You will...", "Your path...", "The universe reveals...")
-End with an inspiring closing message.`;
+Örnek ton: "Fincanında ilginç bir şekil var, sağ tarafta bir kuş gibi duruyor — bu genellikle bir haber ya da sürpriz anlamına gelir. Yakın zamanda beklemediğin birinden mesaj gelebilir. İş konusunda ise biraz temkinli olman iyi olur..."
+
+Uzunluk: 150-250 kelime.
+Sonu merak uyandıran, kısa ve çarpıcı bir cümleyle bitir.`;
 
 export async function POST(request: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json(
-      { error: "OpenAI API key not configured" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "API anahtarı tanımlı değil" }, { status: 500 });
   }
 
   try {
@@ -47,84 +44,49 @@ export async function POST(request: NextRequest) {
     const imageFile = formData.get("image") as File;
 
     if (!imageFile) {
-      return NextResponse.json({ error: "No image provided" }, { status: 400 });
+      return NextResponse.json({ error: "Fotoğraf bulunamadı" }, { status: 400 });
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(imageFile.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Geçersiz dosya türü. JPEG, PNG veya WebP yükleyin." }, { status: 400 });
     }
 
-    // Validate file size (max 10MB)
     if (imageFile.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "Image too large. Maximum size is 10MB." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dosya çok büyük. Maksimum 10MB." }, { status: 400 });
     }
 
-    // Convert file to base64
     const bytes = await imageFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64Image = buffer.toString("base64");
+    const base64Image = Buffer.from(bytes).toString("base64");
     const mimeType = imageFile.type as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      max_tokens: 600,
+      max_tokens: 700,
       messages: [
         {
           role: "user",
           content: [
-            {
-              type: "text",
-              text: FORTUNE_PROMPT,
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${mimeType};base64,${base64Image}`,
-                detail: "high",
-              },
-            },
+            { type: "text", text: FORTUNE_PROMPT },
+            { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: "high" } },
           ],
         },
       ],
     });
 
     const fortune = response.choices[0]?.message?.content;
-
-    if (!fortune) {
-      throw new Error("No fortune generated");
-    }
+    if (!fortune) throw new Error("Fal üretilemedi");
 
     return NextResponse.json({ fortune });
   } catch (error) {
-    console.error("Fortune API error:", error);
+    console.error("Fal API hatası:", error);
 
     if (error instanceof OpenAI.APIError) {
-      if (error.status === 401) {
-        return NextResponse.json(
-          { error: "Invalid API key" },
-          { status: 401 }
-        );
-      }
-      if (error.status === 429) {
-        return NextResponse.json(
-          { error: "Rate limit exceeded. Please try again later." },
-          { status: 429 }
-        );
-      }
+      if (error.status === 401) return NextResponse.json({ error: "Geçersiz API anahtarı" }, { status: 401 });
+      if (error.status === 429) return NextResponse.json({ error: "Kota aşıldı. Lütfen biraz bekle." }, { status: 429 });
     }
 
-    return NextResponse.json(
-      { error: "Failed to generate fortune reading" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Fal yorumu alınamadı" }, { status: 500 });
   }
 }
